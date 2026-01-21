@@ -1,162 +1,183 @@
 import streamlit as st
 import pandas as pd
 
-# --- 1. PAGE CONFIGURATION ---
-st.set_page_config(page_title="ExamCracker Pro", layout="wide")
+# --- 1. CONFIGURATION ---
+st.set_page_config(page_title="ExamCracker Pro", layout="centered", page_icon="🎓")
 
-# --- 2. CUSTOM CSS (The "Jeepredictor.in" Look) ---
+# --- 2. PROFESSIONAL CSS (The "CrackIT" Look) ---
 st.markdown("""
     <style>
-    /* Main Background */
-    .stApp { background-color: #f8f9fa; }
+    /* Clean White Background */
+    .stApp { background-color: #ffffff; }
     
-    /* Hide Streamlit Header/Footer */
+    /* Remove default red/orange Streamlit bars */
     header {visibility: hidden;}
     footer {visibility: hidden;}
     
-    /* Card Style for Results */
-    .result-card {
-        background-color: white;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        margin-bottom: 15px;
-        border-left: 5px solid #2563eb;
-        transition: transform 0.2s;
-    }
-    .result-card:hover { transform: translateY(-2px); }
-    
-    /* Trend Indicators */
-    .trend-harder { color: #dc2626; font-weight: bold; font-size: 14px; }
-    .trend-easier { color: #16a34a; font-weight: bold; font-size: 14px; }
-    
-    /* Tabs Styling */
-    .stTabs [data-baseweb="tab-list"] { gap: 8px; }
-    .stTabs [data-baseweb="tab"] {
-        background-color: white;
-        border-radius: 8px 8px 0 0;
-        padding: 10px 20px;
+    /* Input Fields Styling */
+    .stNumberInput input, .stSelectbox div[data-baseweb="select"] {
+        border-radius: 8px;
         border: 1px solid #e5e7eb;
     }
-    .stTabs [aria-selected="true"] {
-        background-color: #2563eb;
-        color: white;
-        border-color: #2563eb;
+    
+    /* The "Result Card" - This makes it look pro */
+    .result-card {
+        background-color: white;
+        padding: 24px;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        margin-bottom: 16px;
+        transition: all 0.2s;
     }
+    .result-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Status Badges */
+    .badge-safe {
+        background-color: #dcfce7; color: #166534; 
+        padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600;
+    }
+    .badge-risk {
+        background-color: #fee2e2; color: #991b1b; 
+        padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600;
+    }
+    
+    /* Titles */
+    h1, h2, h3 { font-family: 'Inter', sans-serif; color: #111827; }
     </style>
 """, unsafe_allow_html=True)
 
-# --- 3. DATA LOADER ---
+# --- 3. DATA ENGINE ---
 @st.cache_data
 def load_data():
     try:
-        df = pd.read_csv("college_data.csv")
-        return df
+        # Expecting columns: College, Branch, Category, Rank, Exam
+        return pd.read_csv("college_data.csv")
     except:
-        return pd.DataFrame()
+        return pd.DataFrame() # Return empty if no file found
 
 df = load_data()
 
-# --- 4. SIDEBAR: AFFILIATE & ADS ---
-with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/3135/3135715.png", width=80)
-    st.title("ExamCracker")
+# --- 4. HEADER ---
+st.image("https://cdn-icons-png.flaticon.com/512/2997/2997295.png", width=60)
+st.title("ExamCracker Official Predictor")
+st.markdown("### The most accurate tool for **JEE Mains & COMEDK**.")
+
+# --- 5. MAIN TABS ---
+tab_rank, tab_college = st.tabs(["📊 Rank Predictor", "🏛️ College Predictor"])
+
+# =========================================================
+# TAB 1: RANK PREDICTOR (Percentile -> Rank)
+# =========================================================
+with tab_rank:
+    st.markdown("#### Calculate your All India Rank (AIR)")
+    
+    rank_exam = st.radio("Select Exam", ["JEE Mains (Percentile)", "COMEDK (Marks)"], horizontal=True)
+    
     st.markdown("---")
     
-    # Dynamic Affiliate Links based on Exam
-    selected_exam = st.selectbox("Select Exam Focus", ["JEE Mains", "COMEDK", "WBJEE", "MHT-CET"])
-    
-    st.markdown("### 📚 Best Books (Recommended)")
-    if selected_exam == "JEE Mains":
-        st.info("📖 **[Arihant 43 Years Solved Papers](https://www.amazon.in)**\n\nMust have for JEE aspirants.")
-    elif selected_exam == "COMEDK":
-        st.info("📖 **[COMEDK Prep Guide 2026](https://www.amazon.in)**\n\nSpeed is key for COMEDK.")
-    elif selected_exam == "WBJEE":
-        st.info("📖 **[MTG WBJEE Explorer](https://www.amazon.in)**\n\nBest for Jadavpur prep.")
-    elif selected_exam == "MHT-CET":
-        st.info("📖 **[Target MHT-CET Triumph](https://www.amazon.in)**\n\nBible for Maharashtra colleges.")
+    if "JEE" in rank_exam:
+        # LOGIC: JEE Rank = (100 - Percentile) * Total Candidates / 100
+        # Estimated Candidates for 2026: 14,50,000
+        total_candidates = 1450000 
+        
+        percentile = st.number_input("Enter Your JEE Percentile", 0.0, 100.0, 90.0, step=0.1, format="%.2f")
+        
+        if st.button("Calculate JEE Rank", type="primary", use_container_width=True):
+            if percentile > 0:
+                rank = (100 - percentile) * total_candidates / 100
+                rank = int(rank)
+                if rank == 0: rank = 1
+                
+                st.markdown(f"""
+                <div class="result-card" style="border-left: 5px solid #2563eb; text-align: center;">
+                    <h3 style="margin:0; color:#6b7280; font-size:16px;">Predicted All India Rank (AIR)</h3>
+                    <h1 style="margin:10px 0; color:#2563eb; font-size:42px;">{rank:,}</h1>
+                    <p style="font-size:12px; color:#9ca3af;">Based on ~14.5 Lakh Unique Candidates</p>
+                </div>
+                """, unsafe_allow_html=True)
 
-# --- 5. MAIN CALCULATOR AREA ---
-st.title(f"🚀 {selected_exam} Predictor 2026")
-st.markdown("Analyze your **Rank**, Check **Cutoff Trends**, and Find your **Dream College**.")
-
-tab_rank, tab_college = st.tabs(["🏆 Marks vs Rank", "🏛️ College Predictor"])
-
-# === TAB 1: MARKS VS RANK PREDICTOR ===
-with tab_rank:
-    st.markdown(f"### Predict your {selected_exam} Rank")
-    
-    # Set Max Marks dynamically
-    max_marks = 300 if "JEE" in selected_exam else (180 if "COMEDK" in selected_exam else 200)
-    
-    col1, col2 = st.columns([1, 2])
-    with col1:
-        marks = st.number_input("Enter Your Marks", 0, max_marks, 100)
-        predict_btn = st.button("Predict Rank", type="primary", use_container_width=True)
-    
-    with col2:
-        if predict_btn:
-            # Simple Estimation Logic (Replace with complex math later)
-            if selected_exam == "JEE Mains":
-                base_rank = (300 - marks) * 150
-            else:
-                base_rank = (max_marks - marks) * 50
-            
-            if base_rank < 1: base_rank = 1
+    else: # COMEDK Logic (Marks vs Rank)
+        marks = st.number_input("Enter COMEDK Marks (out of 180)", 0, 180, 100)
+        
+        if st.button("Calculate COMEDK Rank", type="primary", use_container_width=True):
+            # 2025 Trend Approximation
+            if marks > 160: r_min, r_max = 1, 100
+            elif marks > 140: r_min, r_max = 100, 500
+            elif marks > 110: r_min, r_max = 500, 3500
+            elif marks > 90: r_min, r_max = 3500, 9000
+            elif marks > 70: r_min, r_max = 9000, 25000
+            else: r_min, r_max = 25000, 60000
             
             st.markdown(f"""
-            <div style="background-color:#dbeafe; padding:20px; border-radius:10px; border:1px solid #93c5fd; text-align:center;">
-                <h2 style="color:#1e40af; margin:0;">Predicted Rank: {base_rank} - {base_rank + 500}</h2>
-                <p style="margin:0;">Based on 2025 difficulty levels.</p>
+            <div class="result-card" style="border-left: 5px solid #ea580c; text-align: center;">
+                <h3 style="margin:0; color:#6b7280; font-size:16px;">Predicted COMEDK Rank</h3>
+                <h1 style="margin:10px 0; color:#ea580c; font-size:42px;">{r_min} - {r_max}</h1>
             </div>
             """, unsafe_allow_html=True)
 
-# === TAB 2: COLLEGE PREDICTOR WITH TRENDS ===
+
+# =========================================================
+# TAB 2: COLLEGE PREDICTOR (Rank -> College)
+# =========================================================
 with tab_college:
-    st.markdown("### Find Colleges based on Rank")
+    st.markdown("#### Find your Dream College")
     
-    c1, c2, c3 = st.columns(3)
+    c1, c2 = st.columns(2)
     with c1:
-        rank_input = st.number_input("Enter Rank", 1, 100000, 5000)
+        exam_select = st.selectbox("Exam", ["JEE Mains", "COMEDK"])
     with c2:
-        category = st.selectbox("Category", ["General", "OBC", "SC", "ST"])
-    with c3:
-        branch_pref = st.multiselect("Branch", ["CSE", "ISE", "ECE", "Mech"], default=["CSE"])
+        user_rank = st.number_input("Enter Your Rank", 1, 1000000, 5000)
+        
+    category = st.selectbox("Category", ["General", "OBC", "SC", "ST", "EWS"])
 
-    if st.button("Find Colleges", type="primary", use_container_width=True):
-        if df.empty:
-            st.warning("⚠️ Database updating... showing demo results.")
-            # DEMO RESULTS for Visual Check
-            results = [
-                {"College": "RV College of Engineering", "Branch": "CSE", "Cutoff": rank_input - 200, "Trend": "Harder"},
-                {"College": "BMS College of Engineering", "Branch": "ISE", "Cutoff": rank_input + 500, "Trend": "Stable"},
-                {"College": "Ramaiah Institute", "Branch": "ECE", "Cutoff": rank_input + 1200, "Trend": "Easier"}
-            ]
+    if st.button("Find My Colleges", type="primary", use_container_width=True):
+        
+        # 1. FILTER DATA (If CSV exists)
+        if not df.empty:
+            # Filter logic (ensure your CSV has 'Exam' column)
+            mask = (df['Exam'] == exam_select) & (df['Rank'] > user_rank)
+            results = df[mask].sort_values(by='Rank').head(10) # Top 10 options
         else:
-            # Real Filtering Logic
-            results = df[df['Rank'] > rank_input].head(5).to_dict('records') # Simplified for demo
+            # 2. DUMMY DATA (For Design Demo Only - Delete later)
+            results = pd.DataFrame([
+                {"College": "National Institute of Technology (NIT), Trichy", "Branch": "Civil Engineering", "Rank": user_rank + 500, "Chance": "High"},
+                {"College": "IIIT Allahabad", "Branch": "ECE", "Rank": user_rank + 1200, "Chance": "Medium"},
+                {"College": "RV College of Engineering", "Branch": "Mechanical", "Rank": user_rank + 2000, "Chance": "High"},
+            ])
+            if exam_select == "COMEDK":
+                results = pd.DataFrame([
+                    {"College": "RV College of Engineering", "Branch": "Civil", "Rank": user_rank + 100, "Chance": "Low"},
+                    {"College": "BMS College of Engineering", "Branch": "CSE", "Rank": user_rank + 4000, "Chance": "High"},
+                ])
 
-        st.markdown("---")
-        for row in results:
-            # Logic for Safe/Ambitious Color
-            status_color = "#22c55e" if row['Cutoff'] > rank_input else "#eab308"
-            status_text = "Safe Choice" if row['Cutoff'] > rank_input else "Ambitious (Borderline)"
+        # 3. DISPLAY RESULTS AS CARDS (Professional Look)
+        st.write(f"Showing best options for **{exam_select}** Rank **{user_rank}**")
+        
+        for index, row in results.iterrows():
+            # Logic for Badge
+            cutoff = row['Rank']
+            status = "Safe Choice" if cutoff > user_rank + 1000 else "Ambitious"
+            badge_class = "badge-safe" if cutoff > user_rank + 1000 else "badge-risk"
             
-            # Trend Icon
-            trend_icon = "📉 Getting Harder" if row.get("Trend") == "Harder" else "📈 Getting Easier"
-            trend_class = "trend-harder" if row.get("Trend") == "Harder" else "trend-easier"
-
             st.markdown(f"""
-            <div class="result-card" style="border-left-color: {status_color}">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h3 style="margin:0; color:#1f2937;">{row['College']}</h3>
-                    <span style="background-color:{status_color}; color:white; padding:4px 12px; border-radius:20px; font-size:12px;">{status_text}</span>
+            <div class="result-card">
+                <div style="display:flex; justify-content:space-between; align-items:start;">
+                    <div>
+                        <h3 style="margin:0; font-size:18px; font-weight:600;">{row['College']}</h3>
+                        <p style="margin:4px 0 0 0; color:#4b5563; font-size:14px;">Branch: <b>{row['Branch']}</b></p>
+                    </div>
+                    <span class="{badge_class}">{status}</span>
                 </div>
-                <div style="margin-top:10px; color:#4b5563;">
-                    <b>Branch:</b> {row['Branch']}  |  <b>Cutoff:</b> {row['Cutoff']}
-                </div>
-                <div style="margin-top:8px;" class="{trend_class}">
-                    {trend_icon} (vs last year)
+                <div style="margin-top:12px; display:flex; gap:15px; font-size:13px; color:#6b7280;">
+                    <span>⚡ Cutoff Rank: <b>{row['Rank']}</b></span>
+                    <span>📂 Category: <b>{category}</b></span>
                 </div>
             </div>
             """, unsafe_allow_html=True)
+            
+        if results.empty:
+            st.warning("No colleges found in this rank range. Try increasing the rank.")
